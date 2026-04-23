@@ -33,6 +33,52 @@ def verify_webhook():
         return "Forbidden", 403
 
 
+@app.route("/webhook", methods=["POST"])
+def receive_message():
+    data = request.get_json(silent=True)
+    print(f"[RAW] {json.dumps(data)}")
+
+    if not data or data.get("object") != "instagram":
+        return "OK", 200
+
+    try:
+        for entry in data.get("entry", []):
+            messaging_events = entry.get("messaging", [])
+
+            if not messaging_events:
+                for change in entry.get("changes", []):
+                    value = change.get("value", {})
+                    messages = value.get("messages", [])
+                    for msg in messages:
+                        sender_id = msg.get("from", {}).get("id") or msg.get("from")
+                        message_text = msg.get("text", {})
+                        if isinstance(message_text, dict):
+                            message_text = message_text.get("body", "")
+                        if sender_id and message_text:
+                            print(f"[MESSAGE] From {sender_id}: {message_text!r}")
+                            reply = get_response(message_text)
+                            send_reply(sender_id, reply)
+                continue
+
+            for event in messaging_events:
+                if event.get("message", {}).get("is_echo"):
+                    continue
+
+                sender_id    = event.get("sender", {}).get("id")
+                message_text = event.get("message", {}).get("text")
+
+                if not sender_id or not message_text:
+                    continue
+
+                print(f"[MESSAGE] From {sender_id}: {message_text!r}")
+                reply = get_response(message_text)
+                send_reply(sender_id, reply)
+
+    except Exception as e:
+        print(f"[ERROR] {e}")
+        traceback.print_exc()
+
+    return "OK", 200
 
 
 def send_reply(recipient_id: str, message_text: str):
