@@ -1,4 +1,4 @@
-# VELOUR Instagram DM Bot 🖤
+# VELOUR Instagram DM Bot 
 **Automated Instagram DM replies for VELOUR — Premium Clothing**  
 Built with Python 3 + Flask + Meta Graph API (Instagram Messenger API)
 
