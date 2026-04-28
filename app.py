@@ -99,14 +99,3 @@ def send_reply(recipient_id: str, message_text: str):
         print(f"[ERROR] Network: {e}")
 
 
-@app.route("/", methods=["GET"])
-def health_check():
-    return jsonify({
-        "status": "running",
-        "bot":    "VELOUR Instagram DM Bot",
-        "mode":   "keyword-matching"
-    })
-
-
-if __name__ == "__main__":
-    app.run(port=5000, debug=True)
